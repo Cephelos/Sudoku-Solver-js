@@ -37,7 +37,7 @@ class Board {
         return false;
     }
 
-    private checkValid(coordinates, value): boolean{
+    private checkValid(coordinates: [number, number], value: number): boolean{
         // checks for match in column
         for(let i = 0; i < this.gridSize; i++){
             if(this.board[i][coordinates[1]] === value && coordinates[0] !== i){
@@ -82,14 +82,18 @@ class Board {
 
 }
 
+const emptyBoard = [[0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0]];
 
-
-const emptyBoard = new Array(9);
-for(let i = 0; i < 9; i++){
-    emptyBoard[i] = new Array(9);
-}
 
 const b = new Board(emptyBoard);
-b.solve();
-
+console.log(b);
+console.log(b.solve());
 console.log(b);
