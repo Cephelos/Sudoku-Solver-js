@@ -7,8 +7,8 @@ class Board {
     setBoard(sudokuGrid) {
         this.board = sudokuGrid;
     }
-    getBoard() {
-        return this.board;
+    deepCopy() {
+        return JSON.parse(JSON.stringify(this)); // deep copy
     }
     solve() {
         const emptyCellCoordinate = this.findFirstEmpty();
