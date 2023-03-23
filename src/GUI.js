@@ -276,12 +276,28 @@ export class Renderer {
     checkBoard(){
         const solvedBoard = this.board.deepCopy();
         solvedBoard.solve();
-        return this.board.equals(solvedBoard);
+        if(this.board.equals(solvedBoard)){
+            alert("Board is solved!");
+        }
+        else{
+            alert("Board is not solved!");
+        }
     }
 
-    newBoard(i){
-
+    alert(text){
+        const alertBox = this.two.makeRectangle(this.buttonZoneX+this.buttonSize/2, this.buttonSize/2+this.buttonYOffset*5, this.buttonSize, this.buttonSize);
+        alertBox.fill = this.buttonColor;
+        alertBox.stroke = "black";
+        alertBox.linewidth = 2;
+        this.buttonGroup.add(alertBox);
+        
+        const alertText = this.two.makeText(text, this.buttonZoneX+this.buttonSize/2, this.buttonSize/2+this.buttonYOffset*5);
+        alertText.size = 20;
+        alertText.family = "Arial";
+        alertText.fill = "black";
+        this.buttonGroup.add(alertText);
     }
+    
     
 
     clickButton(e) {

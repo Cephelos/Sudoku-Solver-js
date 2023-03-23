@@ -1,5 +1,3 @@
-import cloneDeep from "../node_modules/lodash-es/cloneDeep.js";
-
 class Board {
     constructor(board) {
         this.gridSize = board.length;
@@ -8,7 +6,10 @@ class Board {
     }
 
     deepCopy() {
-        return cloneDeep(this);
+        
+        return new Board(JSON.parse(JSON.stringify(this.board)));;
+        
+
     }
 
     equals(otherBoard) {
