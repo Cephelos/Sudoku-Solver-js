@@ -1,4 +1,5 @@
 import Two from 'https://cdn.skypack.dev/two.js@latest';
+import Board from './solver.js';
 export class Renderer {
 
     // board variables
@@ -28,14 +29,60 @@ export class Renderer {
     mouseCorrectionY = 8;
     notesOn = false;
     keysPressed = new Set();
+    hoverColor = '#55ff55';
+    invalidColor = 'red';
+
+    // boards
+    board1 =       [[0, 6, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 0, 2, 0, 0, 0, 0, 9],
+                    [0, 0, 4, 0, 0, 0, 0, 6, 1],
+                    [4, 7, 0, 0, 2, 0, 0, 0, 0],
+                    [5, 0, 0, 0, 4, 0, 0, 0, 0],
+                    [0, 0, 0, 9, 1, 6, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 9, 2, 0, 0],
+                    [3, 0, 8, 0, 0, 0, 7, 0, 0],
+                    [0, 0, 0, 8, 0, 0, 0, 4, 0]];
+
+    board2 =       [[0, 0, 3, 2, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 8, 0, 7],
+                    [6, 0, 0, 9, 0, 0, 5, 3, 0],
+                    [0, 0, 9, 0, 4, 0, 2, 0, 0],
+                    [0, 7, 5, 0, 0, 2, 0, 9, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 5, 0],
+                    [4, 0, 1, 0, 0, 0, 0, 0, 0],
+                    [0, 8, 0, 5, 6, 1, 0, 0, 0],
+                    [7, 0, 0, 0, 0, 0, 0, 0, 0]];
+
+    board3 =       [[4, 2, 7, 9, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 1, 7],
+                    [0, 0, 5, 0, 0, 0, 0, 0, 0],
+                    [8, 0, 0, 3, 0, 5, 2, 0, 0],
+                    [3, 0, 9, 7, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 8, 0, 1, 0, 4, 0],
+                    [5, 0, 8, 0, 6, 0, 0, 0, 4],
+                    [1, 0, 0, 0, 0, 0, 8, 0, 5],
+                    [0, 6, 0, 0, 0, 0, 0, 0, 0]];
+                    
+    emptyNotesBoard =   [[[], [], [], [], [], [], [], [], []],
+                         [[], [], [], [], [], [], [], [], []],
+                         [[], [], [], [], [], [], [], [], []],
+                         [[], [], [], [], [], [], [], [], []],
+                         [[], [], [], [], [], [], [], [], []],
+                         [[], [], [], [], [], [], [], [], []],
+                         [[], [], [], [], [], [], [], [], []],
+                         [[], [], [], [], [], [], [], [], []],
+                         [[], [], [], [], [], [], [], [], []]];
+
+    boardList = [this.board1, this.board2, this.board3];
 
 
 
 
-    constructor(board, notesBoard, two) {
-        this.board = board;
-        this.notesBoard = notesBoard;
-        this.originalBoard = board.deepCopy(); // Deep copy
+    constructor(two) {
+        const newBoard = new Board(this.boardList[getRandomIntInclusive(0, this.boardList.length - 1)]).deepCopy();
+        this.board = newBoard;
+        this.notesBoard = new Board(this.emptyNotesBoard).deepCopy();
+        this.originalBoard = newBoard.deepCopy();
         this.two = two;
         this.elem = document.body;
         if (this.elem === null) {
@@ -45,7 +92,11 @@ export class Renderer {
         this.boardGroup = this.two.makeGroup();
         this.buttonGroup = this.two.makeGroup();
     }
+
+
+
     renderBoard() {
+        this.boardGroup.remove(this.boardGroup.children);
         const board = this.board.board;
         for (let i = 0; i < this.board.gridSize; i++) {
             for (let j = 0; j < this.board.gridSize; j++) {
@@ -80,7 +131,6 @@ export class Renderer {
                     const text = this.two.makeText(board[i][j].toString(), i * this.boxSize + this.boxSize / 2, j * this.boxSize + this.boxSize / 2);
                     text.size = 30;
                     text.family = "Arial";
-
                     if(this.originalBoard.board[i][j] === board[i][j]){
                         text.fill = "black";
                     }
@@ -119,6 +169,7 @@ export class Renderer {
     }
 
     renderButtons() {
+        this.buttonGroup.remove(this.buttonGroup.children);
         const buttonZone = this.two.makeRectangle(this.buttonZoneX+this.buttonZoneXSize/2, this.buttonZoneY+this.buttonZoneYSize/2, this.buttonZoneXSize, this.buttonZoneYSize);
         buttonZone.fill = 'white';
         buttonZone.noStroke();
@@ -148,12 +199,34 @@ export class Renderer {
         notesButton.stroke = "black";
         notesButton.linewidth = 2;
         this.buttonGroup.add(notesButton);
+
+        const notesCheckbox = this.two.makeText("X", this.buttonZoneX+this.buttonSize/2, this.buttonSize/2+this.buttonYOffset*3+7);
+        if(this.notesOn){
+            notesCheckbox.fill = "black";
+        }
+        else{
+            notesCheckbox.noFill();
+        }
+        notesCheckbox.size = 70;
+        notesCheckbox.family = "Arial";
+        this.buttonGroup.add(notesCheckbox);
         
-        const editButton = this.two.makeRectangle(this.buttonZoneX+this.buttonSize/2, this.buttonSize/2+this.buttonYOffset*4, this.buttonSize, this.buttonSize);
-        editButton.fill = this.buttonColor;
-        editButton.stroke = "black";
-        editButton.linewidth = 2;
-        this.buttonGroup.add(editButton);
+        const newButton = this.two.makeRectangle(this.buttonZoneX+this.buttonSize/2, this.buttonSize/2+this.buttonYOffset*4, this.buttonSize, this.buttonSize);
+        newButton.fill = this.buttonColor;
+        newButton.stroke = "black";
+        newButton.linewidth = 2;
+        this.buttonGroup.add(newButton);
+
+        const newCheckbox = this.two.makeText("X", this.buttonZoneX+this.buttonSize/2, this.buttonSize/2+this.buttonYOffset*4+7);
+        if(this.newOn){
+            newCheckbox.fill = "black";
+        }
+        else{
+            newCheckbox.noFill();
+        }
+        newCheckbox.size = 70;
+        newCheckbox.family = "Arial";
+        this.buttonGroup.add(newCheckbox);
 
         const resetText = this.two.makeText("Reset", this.buttonZoneX+this.buttonSize+30, this.buttonSize/2);
         resetText.size = 20;
@@ -179,11 +252,11 @@ export class Renderer {
         notesText.fill = "black";
         this.buttonGroup.add(notesText);
 
-        const editText = this.two.makeText("Edit", this.buttonZoneX+this.buttonSize+21, this.buttonSize/2+this.buttonYOffset*4);
-        editText.size = 20;
-        editText.family = "Arial";
-        editText.fill = "black";
-        this.buttonGroup.add(editText);
+        const newText = this.two.makeText("New", this.buttonZoneX+this.buttonSize+25, this.buttonSize/2+this.buttonYOffset*4);
+        newText.size = 20;
+        newText.family = "Arial";
+        newText.fill = "black";
+        this.buttonGroup.add(newText);
 
 
 
@@ -191,27 +264,63 @@ export class Renderer {
     }
 
     resetBoard(){
-        this.board = this.originalBoard;
+        this.board = this.originalBoard.deepCopy();
         this.renderBoard();
     }
 
+    solveBoard(){
+        this.board.solve();
+        this.renderBoard();
+    }
+
+    checkBoard(){
+        const solvedBoard = this.board.deepCopy();
+        solvedBoard.solve();
+        return this.board.equals(solvedBoard);
+    }
+
+    newBoard(i){
+
+    }
+    
+
     clickButton(e) {
-        
         for(let cell of this.buttonGroup.children){
             if(cell.fill === this.buttonDownColor){
                 if(cell.position.y === this.buttonSize/2){
                     this.resetBoard();
                 }
-
+                else if(cell.position.y === this.buttonSize/2+this.buttonYOffset){
+                    this.solveBoard();
+                }
+                else if(cell.position.y === this.buttonSize/2+this.buttonYOffset*2){
+                    this.checkBoard();
+                }
+                else if(cell.position.y === this.buttonSize/2+this.buttonYOffset*3){
+                    this.notesOn = !this.notesOn;
+                    this.renderButtons();
+                }
+                else if(cell.position.y === this.buttonSize/2+this.buttonYOffset*4){
+                    const newBoard = new Board(this.boardList[getRandomIntInclusive(0, this.boardList.length - 1)]).deepCopy();
+                    this.board = newBoard;
+                    this.notesBoard = new Board(this.emptyNotesBoard).deepCopy();
+                    this.originalBoard = newBoard.deepCopy();
+                    this.renderBoard();
+                }
             }
+            
+            
         }
     }
 
 
     keyPressed(e) {
-        let numPressed = 0;
+        let numPressed = -1;
         this.keysPressed.add(e.keyCode);
         switch (e.keyCode) {
+            case 48:
+                numPressed = 0;
+                break;
             case 49:
                 numPressed = 1;
                 break;
@@ -248,6 +357,7 @@ export class Renderer {
 
         if(this.keysPressed.has(16)){
             this.notesOn = true;
+            
         }
         if(numPressed !== -1){
             if(this.notesOn && this.originalBoard.board[this.selectedCellX][this.selectedCellY] === 0){
@@ -255,17 +365,23 @@ export class Renderer {
                     this.notesBoard.board[this.selectedCellX][this.selectedCellY] = [];
                 }
                 else{
-                    this.notesBoard.board[this.selectedCellX][this.selectedCellY].push(numPressed);
-                    this.notesBoard.board[this.selectedCellX][this.selectedCellY].sort();
+                    if(this.notesBoard.board[this.selectedCellX][this.selectedCellY].includes(numPressed)){
+                        this.notesBoard.board[this.selectedCellX][this.selectedCellY].splice(this.notesBoard.board[this.selectedCellX][this.selectedCellY].indexOf(numPressed), 1);
+                    }
+                    else {
+                        this.notesBoard.board[this.selectedCellX][this.selectedCellY].push(numPressed);
+                        this.notesBoard.board[this.selectedCellX][this.selectedCellY].sort();
+                    }
                 }
             }
             else if(this.originalBoard.board[this.selectedCellX][this.selectedCellY] === 0){
-                this.board.board[this.selectedCellX][this.selectedCellY] = numPressed;
-                this.notesBoard.board[this.selectedCellX][this.selectedCellY] = [];
+                    this.board.board[this.selectedCellX][this.selectedCellY] = numPressed;
+                    this.notesBoard.board[this.selectedCellX][this.selectedCellY] = [];
             }
         
         }
         this.renderBoard();
+        this.renderButtons();
     }
     
 
@@ -274,6 +390,7 @@ export class Renderer {
         if(e.keyCode === 16){
             this.notesOn = false;
         }
+        this.renderButtons();
     }
 
     hoverOverCell(e){
@@ -285,7 +402,7 @@ export class Renderer {
         for(let cell of this.boardGroup.children){
             if(cell.position.x === x * this.boxSize + this.boxSize / 2 && cell.position.y === y * this.boxSize + this.boxSize / 2){
                 if(cell.linewidth === 2){
-                    cell.fill = "red";
+                    cell.fill = this.hoverColor;
                     this.selectedCellX = x;
                     this.selectedCellY = y;
                 }
@@ -320,4 +437,11 @@ export class Renderer {
         this.two.update();
     }
 }
+
+function getRandomIntInclusive(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
+  }
+
 export default Renderer;

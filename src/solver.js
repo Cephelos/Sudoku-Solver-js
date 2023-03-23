@@ -1,15 +1,27 @@
+import cloneDeep from "../node_modules/lodash-es/cloneDeep.js";
+
 class Board {
     constructor(board) {
         this.gridSize = board.length;
         this.boxSize = Math.sqrt(this.gridSize);
         this.board = board;
     }
-    setBoard(sudokuGrid) {
-        this.board = sudokuGrid;
-    }
+
     deepCopy() {
-        return JSON.parse(JSON.stringify(this)); // deep copy
+        return cloneDeep(this);
     }
+
+    equals(otherBoard) {
+        for (let i = 0; i < this.gridSize; i++) {
+            for (let j = 0; j < this.gridSize; j++) {
+                if (this.board[i][j] !== otherBoard.board[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     solve() {
         const emptyCellCoordinate = this.findFirstEmpty();
         const row = emptyCellCoordinate[0];
