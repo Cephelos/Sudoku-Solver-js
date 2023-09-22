@@ -5,7 +5,7 @@
     "util": "^0.12.5"
   },
   "scripts": {
-    "start": "node main.js"
+    "start": "node app/main.js"
  }
  
 }
