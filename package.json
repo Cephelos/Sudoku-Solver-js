@@ -3,5 +3,9 @@
     "assert": "^2.0.0",
     "two.js": "^0.8.10",
     "util": "^0.12.5"
-  }
+  },
+  "scripts": {
+    "start": "node main.js"
+ }
+ 
 }
